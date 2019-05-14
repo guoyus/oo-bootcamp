@@ -5,20 +5,26 @@ namespace ParkingLotLibrary
     public class ParkingLot
     {
         private Vehicle[] slots;
+        public int NumberOfEmptySlots { get; private set; }
 
-        public ParkingLot(int size)
+        public ParkingLot(int capacity)
         {
-            slots = new Vehicle[size];
+            slots = new Vehicle[capacity];
+            NumberOfEmptySlots = capacity;
         }
 
         public Ticket Park(Vehicle vehicle)
         {
-            for(int i = 0; i < slots.Length; i++)
+            if(NumberOfEmptySlots > 0)
             {
-                if(slots[i] == null)
+                for(int i = 0; i < slots.Length; i++)
                 {
-                    slots[i] = vehicle;
-                    return new Ticket(this, i);
+                    if(slots[i] == null)
+                    {
+                        slots[i] = vehicle;
+                        NumberOfEmptySlots--;
+                        return new Ticket(this, i);
+                    }
                 }
             }
             return null;
@@ -50,6 +56,35 @@ namespace ParkingLotLibrary
         {
             ParkingLot = parkingLot;
             SlotId = slotId;
+        }
+    }
+
+    public class ParkingBoy
+    {
+        private ParkingLot[] parkingLots;
+
+        public ParkingBoy(ParkingLot[] parkingLots)
+        {
+            this.parkingLots = parkingLots;
+        }
+
+        public Ticket Park(Vehicle vehicle)
+        {
+            for(int i = 0; i < parkingLots.Length; i++)
+            {
+                if(parkingLots[i].NumberOfEmptySlots > 0)
+                {
+                    return parkingLots[i].Park(vehicle);
+                }
+            }
+            return null;
+        }
+
+        public Vehicle PickUp(Ticket ticket)
+        {
+            var idx = Array.IndexOf(parkingLots, ticket.ParkingLot);
+            if(idx == -1) return null;
+            return parkingLots[idx].PickUp(ticket);
         }
     }
 }
