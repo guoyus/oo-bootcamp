@@ -59,16 +59,33 @@ namespace ParkingLotLibrary
         }
     }
 
-    public class ParkingBoy
+    public abstract class ParkingBoy
     {
-        private ParkingLot[] parkingLots;
+        protected ParkingLot[] parkingLots;
 
         public ParkingBoy(ParkingLot[] parkingLots)
         {
             this.parkingLots = parkingLots;
         }
 
-        public Ticket Park(Vehicle vehicle)
+        public abstract Ticket Park(Vehicle vehicle);
+
+        public Vehicle PickUp(Ticket ticket)
+        {
+            var idx = Array.IndexOf(parkingLots, ticket.ParkingLot);
+            if(idx == -1) return null;
+            return parkingLots[idx].PickUp(ticket);
+        }
+    }
+
+    public class GraduateParkingBoy : ParkingBoy
+    {
+
+        public GraduateParkingBoy(ParkingLot[] parkingLots) : base(parkingLots)
+        {
+        }
+
+        public override Ticket Park(Vehicle vehicle)
         {
             for(int i = 0; i < parkingLots.Length; i++)
             {
@@ -79,12 +96,27 @@ namespace ParkingLotLibrary
             }
             return null;
         }
+    }
 
-        public Vehicle PickUp(Ticket ticket)
+    public class SmartParkingBoy : ParkingBoy
+    {
+        public SmartParkingBoy(ParkingLot[] parkingLots) : base(parkingLots)
         {
-            var idx = Array.IndexOf(parkingLots, ticket.ParkingLot);
-            if(idx == -1) return null;
-            return parkingLots[idx].PickUp(ticket);
+        }
+
+        public override Ticket Park(Vehicle vehicle)
+        {
+            var maxNumberOfSlots = 0;
+            ParkingLot parkingLot = null;
+            for(int i = 0; i < parkingLots.Length; i++)
+            {
+                if(parkingLots[i].NumberOfEmptySlots > maxNumberOfSlots)
+                {
+                    maxNumberOfSlots = parkingLots[i].NumberOfEmptySlots;
+                    parkingLot = parkingLots[i];
+                }
+            }
+            return parkingLot?.Park(vehicle);
         }
     }
 }
